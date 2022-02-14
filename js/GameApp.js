@@ -5,13 +5,20 @@ class Spell extends Phaser.Physics.Arcade.Sprite
         super(scene, x, y, 'spell');
     }
 
-    fire(x, y)
+    fire(x, y, z)
     {
         this.body.reset(x, y);
         this.setActive(true);
         this.setVisible(true);
 
-        this.setVelocityX(-900);
+        if(z)
+        {
+            this.setVelocityX(-900);
+        }
+        else
+        {
+            this.setVelocityX(900);
+        }
     }
 };
 
@@ -30,12 +37,12 @@ class SpellGroup extends Phaser.Physics.Arcade.Group
         });
     }
 
-    castSpell(x, y)
+    castSpell(x, y, z)
     {
         const spell = this.getFirstDead(false);
         if(spell)
         {
-            spell.fire(x, y);
+            spell.fire(x, y, z);
         }
     }
 };
@@ -134,7 +141,7 @@ class Game extends Phaser.Scene
         this.inputKeys.forEach(key => {
 			// Check if the key was just pressed, and if so -> fire the bullet
 			if(Phaser.Input.Keyboard.JustDown(key)) {
-				this.castSpell();
+				this.castSpell(this.player.flipX);
 			}
 		});
     }
@@ -151,9 +158,9 @@ class Game extends Phaser.Scene
 		];
     }
 
-    castSpell()
+    castSpell(face)
     {
-        this.spellGroup.castSpell(this.player.x, this.player.y -20);
+        this.spellGroup.castSpell(this.player.x, this.player.y -20, face);
     }
 
     LoadForestBackground(scene)
