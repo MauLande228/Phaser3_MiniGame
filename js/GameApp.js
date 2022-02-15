@@ -112,7 +112,7 @@ class Game extends Phaser.Scene
 
         this.stars = this.physics.add.group({
             key: 'star',
-            repeat: 7,
+            repeat: 1,
             setXY: { x: 12, y: 0, stepX: 200 }
         });
 
@@ -130,8 +130,10 @@ class Game extends Phaser.Scene
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.collider(this.stars, this.platforms);
         this.physics.add.collider(this.slimes, this.platforms);
+        
         this.physics.add.overlap(this.player, this.stars, this.CollectStar, null, this);
         this.physics.add.collider(this.player, this.slimes, this.hitSlime, null, this);
+        this.physics.add.collider(this.spellGroup, this.slimes, this.kill, null, this);
 
         this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
     }
@@ -142,7 +144,7 @@ class Game extends Phaser.Scene
         {
             return;
         }
-        
+
         if(this.cursors.left.isDown)
         {
             this.player.flipX = true;
@@ -221,6 +223,11 @@ class Game extends Phaser.Scene
         player.anims.play('turn');
 
         this.gameOver = true;
+    }
+
+    kill(player, slime)
+    {
+        slime.disableBody(true, true);
     }
 
     LoadForestBackground(scene)
