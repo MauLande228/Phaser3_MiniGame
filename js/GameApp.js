@@ -77,6 +77,8 @@ class Game extends Phaser.Scene
 
         this.platforms = this.physics.add.staticGroup();
         this.platforms.create(400, 618, 'platform').setScale(2).refreshBody();
+        this.platforms.create(800, 618, 'platform').setScale(2).refreshBody();
+        this.platforms.create(1600, 618, 'platform').setScale(2).refreshBody();
         this.platforms.create(600, 425, 'platform');
         this.platforms.create(50, 250, 'platform');
         this.platforms.create(750, 220, 'platform');
@@ -107,9 +109,24 @@ class Game extends Phaser.Scene
             frameRate: 10,
             repeat: -1
         });
+
+        this.stars = this.physics.add.group({
+            key: 'star',
+            repeat: 7,
+            setXY: { x: 12, y: 0, stepX: 200 }
+        });
+
+        this.stars.children.iterate(function (child) {
+            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+        });
         
         this.cursors = this.input.keyboard.createCursorKeys();
+        this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+        this.score = 0;
+
         this.physics.add.collider(this.player, this.platforms);
+        this.physics.add.collider(this.stars, this.platforms);
+        this.physics.add.overlap(this.player, this.stars, this.CollectStar, null, this);
 
         this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
     }
@@ -161,6 +178,14 @@ class Game extends Phaser.Scene
     castSpell(face)
     {
         this.spellGroup.castSpell(this.player.x, this.player.y -20, face);
+    }
+
+    CollectStar(player, star, scene)
+    {
+        star.disableBody(true, true);
+
+        this.score += 1;
+        this.scoreText.setText('Score: ' + this.score);
     }
 
     LoadForestBackground(scene)
