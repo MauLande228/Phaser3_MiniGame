@@ -183,9 +183,6 @@ class Game extends Phaser.Scene
 				this.castSpell(this.player.flipX);
 			}
 		});
-
-        /*this.scoreText.setPosition(this.player.x - 100, this.player.y - 450);
-        this.ammoText.setPosition(this.player.x - 100, this.player.y - 400);*/
     }
 
     AddEvents()
