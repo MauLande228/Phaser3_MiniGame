@@ -57,7 +57,7 @@ class Game extends Phaser.Scene
     preload()
     {
         this.LoadForestBackground(this);
-        this.load.image('bomb', '../assets/bomb.png');
+        this.load.image('slime', '../assets/slime.png');
         this.load.image('platform', '../assets/platform.png');
         this.load.image('star', '../assets/star.png');
         this.load.image('sky', '../assets/sky.png');
@@ -119,20 +119,30 @@ class Game extends Phaser.Scene
         this.stars.children.iterate(function (child) {
             child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
         });
+
+        this.slimes = this.physics.add.group();
         
         this.cursors = this.input.keyboard.createCursorKeys();
         this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
         this.score = 0;
+        this.gameOver = false;
 
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.collider(this.stars, this.platforms);
+        this.physics.add.collider(this.slimes, this.platforms);
         this.physics.add.overlap(this.player, this.stars, this.CollectStar, null, this);
+        this.physics.add.collider(this.player, this.slimes, this.hitSlime, null, this);
 
         this.cameras.main.startFollow(this.player, true, 0.05, 0.05);
     }
 
     update()
     {
+        if(this.gameOver)
+        {
+            return;
+        }
+        
         if(this.cursors.left.isDown)
         {
             this.player.flipX = true;
@@ -186,6 +196,31 @@ class Game extends Phaser.Scene
 
         this.score += 1;
         this.scoreText.setText('Score: ' + this.score);
+
+        if (this.stars.countActive(true) === 0)
+        {
+            this.stars.children.iterate(function (child) {
+                child.enableBody(true, child.x, 0, true, true);
+            });
+
+            var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+            var bomb = this.slimes.create(x, 16, 'slime');
+            bomb.setBounce(1);
+            bomb.setScale(0.15);
+            bomb.setCollideWorldBounds(true);
+            bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+            bomb.allowGravity = false;
+        }
+    }
+
+    hitSlime(player, slime)
+    {
+        this.physics.pause();
+
+        player.setTint(0xff0000);
+        player.anims.play('turn');
+
+        this.gameOver = true;
     }
 
     LoadForestBackground(scene)
