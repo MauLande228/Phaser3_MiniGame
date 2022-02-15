@@ -82,6 +82,8 @@ class Game extends Phaser.Scene
         this.platforms.create(600, 425, 'platform');
         this.platforms.create(50, 250, 'platform');
         this.platforms.create(750, 220, 'platform');
+        this.platforms.create(1300, 420, 'platform');
+        this.platforms.create(1350, 140, 'platform');
 
         this.spellGroup = new SpellGroup(this);
         this.AddEvents();
@@ -112,8 +114,8 @@ class Game extends Phaser.Scene
 
         this.stars = this.physics.add.group({
             key: 'star',
-            repeat: 1,
-            setXY: { x: 12, y: 0, stepX: 200 }
+            repeat: 9,
+            setXY: { x: 12, y: 0, stepX: 150 }
         });
 
         this.stars.children.iterate(function (child) {
@@ -123,9 +125,18 @@ class Game extends Phaser.Scene
         this.slimes = this.physics.add.group();
         
         this.cursors = this.input.keyboard.createCursorKeys();
-        this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+        this.scoreText = this.add.text( this.player.x - 100, 
+                                        this.player.y - 450, 
+                                        'Score: 0', 
+                                        { fontSize: '32px', fill: '#000' }).setScrollFactor(0);
         this.score = 0;
         this.gameOver = false;
+
+        this.ammoText = this.add.text(  this.player.x - 100, 
+                                        this.player.y - 400, 
+                                        'Ammo: 30', 
+                                        { fontSize: '28px', fill: '#f00'}).setScrollFactor(0);
+        this.ammo = 30;
 
         this.physics.add.collider(this.player, this.platforms);
         this.physics.add.collider(this.stars, this.platforms);
@@ -168,11 +179,13 @@ class Game extends Phaser.Scene
         }
 
         this.inputKeys.forEach(key => {
-			// Check if the key was just pressed, and if so -> fire the bullet
 			if(Phaser.Input.Keyboard.JustDown(key)) {
 				this.castSpell(this.player.flipX);
 			}
 		});
+
+        /*this.scoreText.setPosition(this.player.x - 100, this.player.y - 450);
+        this.ammoText.setPosition(this.player.x - 100, this.player.y - 400);*/
     }
 
     AddEvents()
@@ -190,6 +203,8 @@ class Game extends Phaser.Scene
     castSpell(face)
     {
         this.spellGroup.castSpell(this.player.x, this.player.y -20, face);
+        this.ammo -= 1;
+        this.ammoText.setText('Ammo: ' + this.ammo);
     }
 
     CollectStar(player, star, scene)
@@ -204,15 +219,15 @@ class Game extends Phaser.Scene
             this.stars.children.iterate(function (child) {
                 child.enableBody(true, child.x, 0, true, true);
             });
-
-            var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-            var bomb = this.slimes.create(x, 16, 'slime');
-            bomb.setBounce(1);
-            bomb.setScale(0.15);
-            bomb.setCollideWorldBounds(true);
-            bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-            bomb.allowGravity = false;
         }
+
+        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
+        var bomb = this.slimes.create(x, 16, 'slime');
+        bomb.setBounce(1);
+        bomb.setScale(0.15);
+        bomb.setCollideWorldBounds(true);
+        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
+        bomb.allowGravity = false;
     }
 
     hitSlime(player, slime)
